@@ -157,7 +157,7 @@ Get-NetDomainTrust -Forest <ForestName>
 __________________________________________________________________________________________________
 __________________________________________________________________________________________________
     User Hunting:
-#Finds all machines on the current domain where the current user has local admin access
+    Finds all machines on the current domain where the current user has local admin access
 Find-LocalAdminAccess -Verbose
 __________________________________________________________________________________________________
 __________________________________________________________________________________________________
@@ -177,3 +177,89 @@ Invoke-UserHunter -CheckAccess
 Invoke-CheckLocalAdminAccess
     If you wanted to check if the current user has administrative access to the local (or a remote) machine
 Test-AdminAccess
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+                                    Using AD Module
+    Get Current Domain: 
+Get-ADDomain
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Enum Other Domains: 
+Get-ADDomain -Identity <Domain>
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Get Domain SID: 
+Get-DomainSID
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Get Domain Controlers:
+Get-ADDomainController
+Get-ADDomainController -Identity <DomainName>
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Enumerate Domain Users:
+Get-ADUser -Filter * -Identity <user> -Properties *
+
+    Get a specific "string" on a user's attribute
+Get-ADUser -Filter 'Description -like "*wtver*"' -Properties Description | select Name, Description
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Enum Domain Computers:
+Get-ADComputer -Filter * -Properties *
+Get-ADGroup -Filter * 
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Enum Domain Trust:
+Get-ADTrust -Filter *
+Get-ADTrust -Identity <DomainName>
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Enum Forest Trust:
+Get-ADForest
+Get-ADForest -Identity <ForestName>
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Domains of Forest Enumeration
+(Get-ADForest).Domains
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Enum Local AppLocker Effective Policy:
+Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    User Hunting
+Sometimes you need to find a machine where a specific user is logged in.
+You can remotely query every machines on the network to get a list of the users's sessions.
+
+    netexec
+
+nxc smb 10.10.10.0/24 -u Administrator -p 'P@ssw0rd' --sessions
+SMB         10.10.10.10    445    WIN-8OJFTLMU1IG  [+] Enumerated sessions
+SMB         10.10.10.10    445    WIN-8OJFTLMU1IG  \\10.10.10.10            User:Administrator
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+Impacket Smbclient
+
+$ impacket-smbclient Administrator@10.10.10.10
+# who
+host:  \\10.10.10.10, user: Administrator, active:     1, idle:     0
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    PowerView Invoke-UserHunter
+
+    # Find computers were a Domain Admin OR a specified user has a session
+    Invoke-UserHunter
+    Invoke-UserHunter -GroupName "RDPUsers"
+    Invoke-UserHunter -Stealth
+__________________________________________________________________________________________________
+__________________________________________________________________________________________________
+    Other Interesting Commands
+    Find Domain Controllers
+
+nslookup domain.com
+nslookup -type=srv _ldap._tcp.dc._msdcs.<domain>.com
+nltest /dclist:domain.com
+Get-ADDomainController -filter * | Select-Object name
+gpresult /r
+$Env:LOGONSERVER 
+echo %LOGONSERVER%
